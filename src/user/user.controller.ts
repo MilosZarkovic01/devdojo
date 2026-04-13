@@ -1,26 +1,31 @@
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { Public } from 'src/auth/constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Public } from 'src/auth/constants';
+import { UserService } from './user.service';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
+  @Public()
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('users_list')
   @Get()
   findAll() {
     return this.userService.findAll();

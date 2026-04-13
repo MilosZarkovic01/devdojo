@@ -1,12 +1,7 @@
 import { registerAs } from '@nestjs/config';
+import { databaseOptions } from './database.options';
 
 export default registerAs('database', () => ({
-  type: 'postgres' as const,
-  host: process.env.POSTGRES_HOST,
-  port: parseInt(process.env.POSTGRES_PORT ?? '5432', 10),
-  database: process.env.POSTGRES_DB,
-  username: process.env.POSTGRES_USERNAME,
-  password: process.env.POSTGRES_PASSWORD,
+  ...databaseOptions,
   autoLoadEntities: true,
-  synchronize: true,
 }));
