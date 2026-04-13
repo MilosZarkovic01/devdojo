@@ -1,12 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSimpleDto } from './dto/user-simple.dto';
 import { User } from './entities/user.entity';
-import { timestamp } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -17,8 +15,15 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) { }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto): Promise<Number> {
+    const user = await this.userRepository.findOneBy({ email: createUserDto.email });
+
+    if (user) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    const newUser = this.userRepository.create(createUserDto);
+    return (await this.userRepository.save(newUser)).id;
   }
 
   async findAll(): Promise<UserSimpleDto[]> {
